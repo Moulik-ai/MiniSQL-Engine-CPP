@@ -31,16 +31,25 @@ void Engine::execute(string command) {
     }
 
     else if (tokens[0] == "SELECT"){
-        string tableName = tokens[3];
 
-        if (tokens.size() > 4 && tokens[4] == "WHERE"){
+        vector<string> selectedColumns;
+        int i = 1;
 
-            string column = tokens[5];
-            string value = tokens[7];
-            db.selectWhere(tableName, column, value);
+        while (tokens[i] != "FROM") {
+            selectedColumns.push_back(tokens[i]);
+            i++;
+        }
+        
+        string tableName = tokens[i+1];
+
+        if (tokens.size() > i+2 && tokens[i+2] == "WHERE"){
+
+            string column = tokens[i+3];
+            string value = tokens[i+5];
+            db.selectColumnsWhere(tableName, selectedColumns, column, value);
         }
         else {
-        db.selectAll(tableName);
+        db.selectColumns(tableName, selectedColumns);
     }
     }
 

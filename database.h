@@ -14,5 +14,7 @@ class Database {
     void insertInto(string tableName, vector<string> values);
     void selectAll(string tableName);
     void selectWhere(string tableName, string column, string value);
+    void selectColumns(string tableName, vector<string> selectedColumns);
+    void selectColumnsWhere(string tableName, vector<string> selectedColumns, string column, string value);
 };
 #endif
