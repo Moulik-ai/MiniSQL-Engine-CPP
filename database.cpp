@@ -25,3 +25,38 @@ void Database::selectAll(string tableName) {
     }
     tables[tableName].printTable();
 }
+
+void Database::selectWhere(string tableName, string column, string value) {
+    if (tables.find(tableName) == tables.end()) {
+        cout << "Table not found!\n";
+        return;
+    }
+
+    Table& table = tables[tableName];
+
+    int columnIndex = -1;
+
+    for (int i = 0; i < table.columns.size(); i++) {
+        if (table.columns[i] == column) {
+            columnIndex = i;
+            break;
+        }
+    }
+
+    if (columnIndex == -1) {
+        cout << "Column not found!\n";
+        return;
+    }
+
+    for (auto col : table.columns)
+        cout << col << "\t";
+    cout << "\n";
+
+    for (auto row : table.rows) {
+        if (row.values[columnIndex] == value){
+            for (auto val : row.values)
+                cout << val << "\t";
+        cout << "\n";
+        }
+    }
+}

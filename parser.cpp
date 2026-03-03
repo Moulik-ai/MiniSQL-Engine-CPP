@@ -1,14 +1,25 @@
 #include "parser.h"
-#include <sstream>
+#include <cctype>
 
 vector<string> split(string input) {
-    stringstream ss(input);
-    string word;
     vector<string> tokens;
+    string current = "";
 
-    while (ss >> word) {
-        tokens.push_back(word);
+    for (char ch : input) {
+        if (isspace(ch) || ch == '(' || ch == ')' || ch == ',' || ch == ';') {
+            if (!current.empty()) {
+                tokens.push_back(current);
+                current = "";
+            }
+        } else {
+            current += ch;
+        }
     }
+
+    if(!current.empty()) {
+        tokens.push_back(current);
+    }
+
 
     return tokens;
 }
