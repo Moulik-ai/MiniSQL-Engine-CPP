@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -16,6 +17,7 @@ class Table {
     string name;
     vector<string> columns;
     vector<Row> rows;
+    unordered_map<string, unordered_map<string, vector<int>>> indexes; //hash functions (use of pure discrete mathematics) to create indexes for columns
 
     Table() {}
     Table(string tableName, vector<string> cols) {
@@ -25,6 +27,7 @@ class Table {
 
     void insertRow(vector<string> values);
     void printTable();
+    void createIndex(string columnName);
 };
 
 #endif

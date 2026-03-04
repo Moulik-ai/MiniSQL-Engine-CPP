@@ -155,6 +155,27 @@ void Database::selectColumnsWhere(string tableName, vector<string> selectedColum
         cout << table.columns[idx] << "\t";
     cout << "\n";
 
+    if (table.indexes.find(column) != table.indexes.end()) {
+
+        cout << "Using index for optimization\n";
+        auto &indexMap = table.indexes[column];
+
+        if (indexMap.find(value) != indexMap.end()) {
+
+            vector<int> matchingRows = indexMap[value];
+
+            for (int rowIndex : matchingRows) {
+                for (auto idx : columnIndexes)
+                    cout << table.rows[rowIndex].values[idx] << "\t";
+                cout << "\n";
+            }
+
+            return;
+        }
+    }
+
+
+    cout << "Performing full table scan\n";
     for (auto row : table.rows) {
         if (row.values[whereIndex] == value) {
             for (auto idx : columnIndexes)

@@ -53,6 +53,14 @@ void Engine::execute(string command) {
     }
     }
 
+    else if (tokens[0] == "CREATE" && tokens[1] == "INDEX") {
+
+        string tableName = tokens[3];
+        string columnName = tokens[4];
+        
+        db.tables[tableName].createIndex(columnName);
+    }
+
     else {
         cout << "Invalid command\n";
     }
