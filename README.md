@@ -21,6 +21,12 @@ This project was built to understand database internals including:
 - In-memory relational storage
 - Hash-based table lookup using `std::unordered_map`
 
+- ### Phase 3 Features
+- Hash-based indexing
+- CREATE INDEX support
+- Optimized WHERE queries
+- Automatic index updates on INSERT
+
 ---
 
 ## 🏗 Architecture
