@@ -16,5 +16,8 @@ class Database {
     void selectWhere(string tableName, string column, string value);
     void selectColumns(string tableName, vector<string> selectedColumns);
     void selectColumnsWhere(string tableName, vector<string> selectedColumns, string column, string value);
+    void saveTable(string tableName);
+    void loadTable(string tableName);
+    void loadAllTables();
 };
 #endif

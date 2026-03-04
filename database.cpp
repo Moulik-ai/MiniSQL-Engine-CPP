@@ -1,5 +1,10 @@
 #include "database.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 using namespace std;
 
@@ -18,6 +23,8 @@ void Database::insertInto(string tableName, vector<string> values) {
         return;
     }
     tables[tableName].insertRow(values);
+
+    saveTable(tableName);
 }
 
 void Database::selectAll(string tableName) {
@@ -183,4 +190,89 @@ void Database::selectColumnsWhere(string tableName, vector<string> selectedColum
             cout << "\n";
         }
     }
+}
+
+void Database::saveTable(string tableName) {
+    Table &table = tables[tableName];
+
+    ofstream file(tableName + ".table");
+
+    file << "TABLE" << table.name << "\n";
+
+    file << "COLUMNS ";
+    for (auto col : table.columns) 
+        file << col << " ";
+    file << "\n";
+
+    for (auto row : table.rows) {
+        file << "ROW ";
+        for (auto val : row.values)
+            file << val << " ";
+        file << "\n";
+    }
+
+    file.close();
+}
+
+void Database::loadTable(string tableName) {
+    ifstream file(tableName + ".table");
+
+    if (!file.is_open()) {
+        cout << "No saved table found.\n";
+        return;
+    }
+
+    string line;
+
+    vector<string> columns;
+    vector<vector<string>> rows;
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string word;
+
+        ss >> word;
+
+        if (word == "COLUMNS") {
+            string col;
+            while (ss >> col)
+                columns.push_back(col);
+        }
+
+        if (word == "ROW") {
+            vector<string> row;
+            string val;
+            while (ss >> val)
+                row.push_back(val);
+            rows.push_back(row);
+        }
+    }
+
+    tables[tableName] = Table(tableName, columns);
+
+    for (auto r : rows)
+        tables[tableName].insertRow(r);
+
+    file.close();
+
+    cout << "Table loaded from disk.\n";
+}
+
+void Database::loadAllTables() {
+
+    cout << "Loading tables from disk...\n";
+
+    for (const auto &entry : fs::directory_iterator(".")) {
+
+        string filename = entry.path().filename().string();
+
+        if (filename.size() > 6 && filename.substr(filename.size() - 6) == ".table") {
+            string tableName = filename.substr(0, filename.size() - 6);
+
+            loadTable(tableName);
+
+        }
+    }
+
+    cout << "All tables loaded.\n";
 }

@@ -9,6 +9,8 @@ int main() {
 
     cout << "Mini SQL Engine Started\n";
 
+    engine.db.loadAllTables();
+
     while (true) {
         cout << ">>";
         getline(cin, command);

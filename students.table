@@ -1,0 +1,5 @@
+TABLEstudents
+COLUMNS id name age 
+ROW 1 Moulik 19 
+ROW 2 Aryan 20 
+ROW 3 Gourav 10 
