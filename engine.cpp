@@ -27,6 +27,10 @@ void Engine::execute(string command) {
             values.push_back(tokens[i]);
         }
 
+        for (auto t : tokens) 
+            cout << t << " ";
+        cout << endl;
+
         db.insertInto(tableName, values);
     }
 
@@ -61,6 +65,54 @@ void Engine::execute(string command) {
         db.tables[tableName].createIndex(columnName);
     }
 
+
+    else if (tokens[0] == "DELETE") {
+
+        string tableName = tokens[2];
+        string column = tokens[4];
+        string value = tokens[6];
+
+        db.deleteWhere(tableName, column, value);
+    }
+
+    else if (tokens[0] == "UPDATE") {
+
+        string column = tokens[7];
+        string tableName = tokens[4];
+
+        Table &table = db.tables[tableName];
+
+        if (table.indexes.find(column) != table.indexes.end()) {
+
+            cout << "Query Plan:\n";
+            cout << "Index Scan on " << tableName << "(" << column << ")\n";
+        }
+    }
+
+    else if (tokens[0] == "EXPLAIN") {
+
+        if (tokens.size() < 9) {
+            cout << "Invalid EXPLAIN syntax\n";
+            return;
+        }
+
+        string tableName = tokens[4];
+        string column = tokens[6];
+
+        Table &table = db.tables[tableName];
+
+        cout << "Query Plan: \n";
+
+        if (table.indexes.find(column) != table.indexes.end()) {
+
+            cout << "Index scan on "
+                << tableName
+                << "("
+                << column
+                << ")"
+                << "\n";
+        }
+    }
     else {
         cout << "Invalid command\n";
     }

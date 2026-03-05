@@ -276,3 +276,79 @@ void Database::loadAllTables() {
 
     cout << "All tables loaded.\n";
 }
+
+void Database::updateWhere(string tableName,
+                            string targetColumn,
+                            string newValue,
+                            string conditionColumn,
+                            string conditionValue) {
+    if (tables.find(tableName) == tables.end()) {
+        cout << "Table not found!\n";
+        return;
+    }
+
+    Table &table = tables[tableName];
+
+    int targetIndex = -1;
+    int conditionIndex = -1;
+
+    for (int i = 0; i < table.columns.size(); i++) {
+
+        if (table.columns[i] == targetColumn)
+            targetIndex = i;
+
+        if (table.columns[i] == conditionColumn)
+            conditionIndex = i;
+    }
+
+    if (targetIndex == -1 || conditionIndex == -1) {
+        cout << "Column not found!\n";
+        return;
+    }
+
+    for (auto &row : table.rows) {
+        if (row.values[conditionIndex] == conditionValue)
+            row.values[targetIndex] = newValue;
+    }
+
+    saveTable(tableName);
+
+    cout << "Rows updated.\n";
+}
+
+void Database::deleteWhere(string tableName, string column, string value) {
+
+    if (tables.find(tableName) == tables.end()) {
+        cout << "Table not found!\n";
+        return;
+    }
+
+    Table &table = tables[tableName];
+
+    int columnIndex = -1;
+
+    for (int i =0; i < table.columns.size(); i++) {
+        if (table.columns[i] == column) {
+            columnIndex = i;
+            break;
+        }
+    }
+
+    if (columnIndex == -1) {
+        cout << "Column not found!\n";
+        return;
+    }
+
+    vector<Row> newRows;
+
+    for (auto row : table.rows) {
+        if (row.values[columnIndex] != value)
+        newRows.push_back(row);
+    }
+
+    table.rows = newRows;
+
+    saveTable(tableName);
+
+    cout << "Rows deleted.\n";
+}

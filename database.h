@@ -19,5 +19,11 @@ class Database {
     void saveTable(string tableName);
     void loadTable(string tableName);
     void loadAllTables();
+    void deleteWhere(string tableName, string column, string value);
+    void updateWhere(string tableName,
+                    string targetColumn,
+                    string newValue,
+                    string conditionColumn,
+                    string conditionValue);
 };
 #endif
