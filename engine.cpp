@@ -103,6 +103,11 @@ void Engine::execute(string command) {
         string tableName = tokens[4];
         string column = tokens[6];
 
+        if (db.tables.find(tableName) == db.tables.end()) {
+            cout << "Table not found!\n";
+            return;
+        }
+
         Table &table = db.tables[tableName];
 
         cout << "Query Plan: \n";
@@ -115,6 +120,10 @@ void Engine::execute(string command) {
                 << column
                 << ")"
                 << "\n";
+        }
+
+        else {
+            cout << "Full Table Scan\n";
         }
     }
     else {

@@ -19,21 +19,49 @@ int main(int argc, char* argv[]) {
     engine.db.loadAllTables();
 
     while (true) {
+
         cout << "MiniSQL> ";
 
         getline(cin, command);
 
-        if (command == "EXIT" || command == "exit" || command == "Exit") {
+        if (command == ".exit") {
+            break;
+        }
+
+        if (command == ".help") {
+
+            cout << "Available commands:\n";
+            cout << "CREATE TABLE\n";
+            cout << "INSERT INTO\n";
+            cout << "SELECT\n";
+            cout << "DELETE\n";
+            cout << "CREATE INDEX\n";
+            cout << "EXPLAIN\n";
+            cout << ".tables\n";
+            cout << ".exit\n";
+
+            continue;
+        }
+
+        if (command == ".tables") {
+
+            cout << "Tables:\n";
+
+            for (auto &t : engine.db.tables)
+                cout << t.first << endl;
+
+            continue;
+        }
+
+        if (command == "Exit" || command == "exit" || command == "EXIT"){
+            cout << "Closing MiniSQL, Hope you liked my project :)\n";
             break;
         }
 
         if (command.empty())
             continue;
 
-        engine.execute(command);
+            engine.execute(command);
     }
-
-    cout << "C;osing MiniSQL.\n";
-
     return 0;
 }
