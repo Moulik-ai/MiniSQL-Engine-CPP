@@ -1,17 +1,10 @@
 # MiniSQL++ – A Lightweight SQL Engine in C++
 
-MiniSQL++ is a **lightweight relational database engine built from scratch in C++** to explore the internal workings of database systems.
+MiniSQL++ is a **lightweight relational database engine built entirely from scratch in C++**.
 
-It implements a simplified SQL-like query engine capable of parsing commands, storing relational data, executing queries, and optimizing lookups using **hash-based indexing**.
+The project implements a simplified SQL query processor capable of parsing commands, storing relational data, executing queries, and optimizing lookups using **hash-based indexing**.
 
-This project demonstrates core database concepts including:
-
-* SQL command parsing
-* Relational table storage
-* Query execution engine
-* Hash-based indexing
-* Persistent storage
-* Query planning
+This project was created to explore **how real database systems work internally**, including query parsing, execution pipelines, indexing, and disk persistence.
 
 ---
 
@@ -19,34 +12,86 @@ This project demonstrates core database concepts including:
 
 ## Core SQL Support
 
-* `CREATE TABLE`
-* `INSERT INTO`
-* `SELECT`
-* `WHERE` filtering
-* Column projection (`SELECT name FROM table`)
-* Multiple table support
+MiniSQL++ currently supports a subset of SQL operations:
+
+- CREATE TABLE
+- INSERT INTO
+- SELECT
+- WHERE filtering
+- Column projection (`SELECT column FROM table`)
+- Multiple tables support
+
+Example:
+
+```
+CREATE TABLE students (id name age)
+
+INSERT INTO students VALUES (1 Moulik 19)
+INSERT INTO students VALUES (2 Aryan 20)
+
+SELECT * FROM students
+```
 
 ---
 
-## Query Modification
+## Data Modification Queries
 
-* `DELETE FROM table WHERE condition`
-* `UPDATE table SET column=value WHERE condition`
+MiniSQL++ also supports modifying existing data.
+
+Supported commands:
+
+- UPDATE table SET column=value WHERE condition
+- DELETE FROM table WHERE condition
+
+Example:
+
+```
+UPDATE students SET age = 21 WHERE id = 1
+
+DELETE FROM students WHERE age = 21
+```
 
 ---
 
-## Indexing & Optimization
+## Indexing & Query Optimization
 
-* Hash-based indexing
-* `CREATE INDEX` support
-* Automatic index updates on INSERT
-* Optimized WHERE queries using indexes
+MiniSQL++ includes **hash-based indexing** to accelerate queries.
+
+Features:
+
+- CREATE INDEX support
+- Automatic index updates on INSERT
+- Fast lookup for indexed columns
+- Query plan detection
+
+Example:
+
+```
+CREATE INDEX ON students (age)
+```
+
+Internal index structure:
+
+```
+age → {
+  19 → [0,2]
+  20 → [1]
+}
+```
+
+This allows **O(1) average lookup time** for queries like:
+
+```
+SELECT * FROM students WHERE age = 19
+```
 
 ---
 
-## Query Planning
+## Query Planning (EXPLAIN)
 
-* `EXPLAIN` command to show query execution strategy
+MiniSQL++ includes a simple **query planner**.
+
+The EXPLAIN command shows how the database will execute a query.
 
 Example:
 
@@ -61,7 +106,7 @@ Query Plan:
 Index Scan on students(age)
 ```
 
-or
+If no index exists:
 
 ```
 Query Plan:
@@ -72,7 +117,7 @@ Full Table Scan
 
 ## Persistent Storage
 
-Tables are automatically saved to disk and loaded when the engine starts.
+Tables are automatically saved to disk and reloaded when the engine starts.
 
 Example stored file:
 
@@ -80,7 +125,7 @@ Example stored file:
 students.table
 ```
 
-File contents:
+Example contents:
 
 ```
 TABLE students
@@ -90,36 +135,98 @@ ROW 2 Aryan 20
 ROW 3 Ravi 19
 ```
 
+This allows the database to **retain data between program executions**.
+
 ---
 
-# 🏗 Architecture
+## Interactive CLI Database Shell
+
+MiniSQL++ includes a command-line database shell similar to SQLite.
+
+Example session:
 
 ```
-MiniSQLEngine/
- ├── main.cpp        → CLI interface and program entry
- ├── engine.*        → SQL command execution
- ├── parser.*        → Query tokenization
- ├── database.*      → Database manager
- ├── table.*         → Table structure and indexing
+MiniSQL Database Engine
+Connected to database.db
+
+MiniSQL> CREATE TABLE learners (id name age)
+MiniSQL> INSERT INTO learners VALUES (1 Moulik 18)
+MiniSQL> INSERT INTO learners VALUES (2 Aryan 19)
+
+MiniSQL> SELECT * FROM learners
+
+id   name   age
+1    Moulik 18
+2    Aryan  19
+```
+
+---
+
+## Built-in CLI Commands
+
+MiniSQL++ also supports CLI meta commands:
+
+```
+.help    → show supported commands
+.tables  → list all tables
+.exit    → exit the database shell
+```
+
+Example:
+
+```
+MiniSQL> .tables
+learners
+students
+```
+
+---
+
+# 🏗 System Architecture
+
+MiniSQL++ follows a simplified database architecture.
+
+```
+           ┌─────────────────┐
+           │   CLI Interface │
+           └────────┬────────┘
+                    │
+                    ▼
+           ┌─────────────────┐
+           │   SQL Parser    │
+           │ (Tokenization)  │
+           └────────┬────────┘
+                    │
+                    ▼
+           ┌─────────────────┐
+           │ Query Execution │
+           │     Engine      │
+           └────────┬────────┘
+                    │
+                    ▼
+           ┌─────────────────┐
+           │  Index Manager  │
+           │ (Hash Indexes)  │
+           └────────┬────────┘
+                    │
+                    ▼
+           ┌─────────────────┐
+           │ Storage Engine  │
+           │  (Tables/Rows)  │
+           └────────┬────────┘
+                    │
+                    ▼
+           ┌─────────────────┐
+           │ Disk Persistence│
+           │   (.table files)│
+           └─────────────────┘
 ```
 
 ---
 
 # 🧠 Internal Design
 
-MiniSQL++ follows a simplified database architecture:
-
-```
-SQL Parser
-      ↓
-Query Execution Engine
-      ↓
-Storage Layer
-      ↓
-Disk Persistence
-```
-
-### Data Structures
+## Table Storage
 
 Tables are stored using:
 
@@ -127,13 +234,44 @@ Tables are stored using:
 unordered_map<string, Table>
 ```
 
+This provides **O(1) average table lookup**.
+
+---
+
+## Table Structure
+
 Each table contains:
 
-* column metadata
-* row storage (`vector<Row>`)
-* hash indexes
+```
+Table
+ ├── tableName
+ ├── columns (vector<string>)
+ ├── rows (vector<Row>)
+ └── indexes (unordered_map)
+```
 
-Index structure:
+---
+
+## Row Representation
+
+Each row is stored as:
+
+```
+Row
+ └── vector<string> values
+```
+
+Example row:
+
+```
+[1, Moulik, 19]
+```
+
+---
+
+## Index Structure
+
+Indexes use nested hash maps:
 
 ```
 column_name → value → row_indexes
@@ -148,26 +286,27 @@ age → {
 }
 ```
 
-This allows **O(1) average lookup time** for indexed queries.
-
 ---
 
 # 🖥 Example Usage
 
 ```
-CREATE TABLE students (id name age)
+CREATE TABLE learners (id name age)
 
-INSERT INTO students VALUES (1 Moulik 19)
-INSERT INTO students VALUES (2 Aryan 20)
-INSERT INTO students VALUES (3 Ravi 19)
+INSERT INTO learners VALUES (1 Moulik 18)
+INSERT INTO learners VALUES (2 Aryan 19)
+INSERT INTO learners VALUES (3 Ravi 19)
 
-SELECT * FROM students
+SELECT * FROM learners
+```
 
-SELECT name FROM students WHERE age = 19
+Output:
 
-DELETE FROM students WHERE age = 20
-
-UPDATE students SET age = 21 WHERE id = 1
+```
+id   name   age
+1    Moulik 18
+2    Aryan  19
+3    Ravi   19
 ```
 
 ---
@@ -175,16 +314,16 @@ UPDATE students SET age = 21 WHERE id = 1
 # 📊 Example Query Plan
 
 ```
-CREATE INDEX ON students (age)
+CREATE INDEX ON learners (age)
 
-EXPLAIN SELECT * FROM students WHERE age = 19
+EXPLAIN SELECT * FROM learners WHERE age = 19
 ```
 
 Output:
 
 ```
 Query Plan:
-Index Scan on students(age)
+Index Scan on learners(age)
 ```
 
 ---
@@ -200,47 +339,81 @@ g++ -std=c++17 main.cpp table.cpp database.cpp parser.cpp engine.cpp -o minisql
 Run:
 
 ```
-./minisql
+./minisql database.db
+```
+
+Example:
+
+```
+./minisql mydatabase.db
 ```
 
 ---
 
-# 📂 Project Goals
+# 📂 Project Structure
 
-This project was built to learn:
-
-* database engine architecture
-* query parsing and execution
-* indexing strategies
-* persistent storage design
-* systems programming in C++
+```
+MiniSQLEngine/
+│
+├── main.cpp        → Program entry point & CLI interface
+├── engine.cpp      → Query execution logic
+├── engine.h
+│
+├── parser.cpp      → SQL tokenizer
+├── parser.h
+│
+├── database.cpp    → Database manager
+├── database.h
+│
+├── table.cpp       → Table storage & indexing
+├── table.h
+│
+├── README.md
+└── minisql.png     → Demo screenshot
+```
 
 ---
 
 # 📈 Future Improvements
 
-Potential future extensions:
+Possible extensions for MiniSQL++:
 
-* JOIN queries
-* ORDER BY
-* query optimizer improvements
-* transaction support
-* binary storage format
-* multi-column indexes
+- JOIN queries
+- ORDER BY
+- GROUP BY
+- query optimizer improvements
+- multi-column indexes
+- binary storage engine
+- transaction support
+- concurrency control
+
+---
+
+# 🎯 Learning Goals
+
+This project explores key concepts from **database systems and systems programming**, including:
+
+- SQL query parsing
+- relational storage models
+- hash-based indexing
+- query execution pipelines
+- persistent storage design
+- command-line database interfaces
 
 ---
 
 # 👨‍💻 Author
 
-**Moulik Choudhary**
-B.Tech CSE | Chandigarh University
+**Moulik Choudhary**  
+B.Tech CSE — Chandigarh University  
 
 Interests:
 
-* Systems Programming
-* Databases
-* Distributed Systems
-* Automation
+- Systems Programming
+- Database Systems
+- Distributed Systems
+- Backend Engineering
+- Automation
 
 ---
 
@@ -252,4 +425,6 @@ Interests:
 
 # ⭐ Project Status
 
-Active learning project and portfolio demonstration of **database engine fundamentals in C++**.
+MiniSQL++ is a **learning-oriented database engine** demonstrating the internal architecture of relational databases using C++.
+
+It serves as a **portfolio project showcasing systems programming, database internals, and algorithmic design**.
