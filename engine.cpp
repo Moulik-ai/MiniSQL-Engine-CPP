@@ -76,17 +76,21 @@ void Engine::execute(string command) {
     }
 
     else if (tokens[0] == "UPDATE") {
+        string tableName = tokens[1];
 
-        string column = tokens[7];
-        string tableName = tokens[4];
+        string targetColumn = tokens[3];
+        string newValue = tokens[5];
 
-        Table &table = db.tables[tableName];
+        string conditionColumn = tokens[7];
+        string conditionValue = tokens[9];
 
-        if (table.indexes.find(column) != table.indexes.end()) {
-
-            cout << "Query Plan:\n";
-            cout << "Index Scan on " << tableName << "(" << column << ")\n";
-        }
+        db.updateWhere(
+            tableName,
+            targetColumn,
+            newValue,
+            conditionColumn,
+            conditionValue
+        );
     }
 
     else if (tokens[0] == "EXPLAIN") {
